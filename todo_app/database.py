@@ -5,6 +5,8 @@ import os
 
 load_dotenv()
 
+print("✅ DATABASE_URL →", os.getenv("DATABASE_URL"))  # remove after testing
+
 DATABASE_URL = os.getenv("DATABASE_URL").replace(
     "postgresql://", "postgresql+asyncpg://"
 )
@@ -18,7 +20,7 @@ AsyncSessionLocal = sessionmaker(
     autoflush=False
 )
 
-Base = declarative_base()   
+Base = declarative_base()
 
 async def get_db():
     async with AsyncSessionLocal() as session:

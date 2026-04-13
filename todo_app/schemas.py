@@ -1,9 +1,26 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
+# --- Auth ---
+
+class RegisterRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=6)
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: str = "15 minutes"
+
+# --- Todo ---
+
 class TodoCreate(BaseModel):
-    title: str
+    title: str = Field(..., min_length=1)
     description: Optional[str] = None
 
 class TodoUpdate(BaseModel):
