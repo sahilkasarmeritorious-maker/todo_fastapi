@@ -1,14 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from todo_app.database import get_db
 from todo_app.auth import get_current_user
 from todo_app import crud, schemas, models
+from todo_app.limiter import limiter
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
 
+# 30 requests per minute for read operations
+# generous limit — reading is cheap
 @router.get("/", response_model=schemas.APIListResponse)
+@limiter.limit("30/minute")
 async def get_all_todos(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
@@ -22,7 +27,9 @@ async def get_all_todos(
 
 
 @router.get("/{todo_id}", response_model=schemas.APIResponse)
+@limiter.limit("30/minute")
 async def get_todo(
+    request: Request,
     todo_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
@@ -33,8 +40,12 @@ async def get_todo(
     return {"success": True, "message": "Todo fetched", "data": todo}
 
 
+# 20 requests per minute for write operations
+# stricter than reads — writing is expensive
 @router.post("/", response_model=schemas.APIResponse, status_code=201)
+@limiter.limit("20/minute")
 async def create_todo(
+    request: Request,
     todo: schemas.TodoCreate,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
@@ -44,7 +55,9 @@ async def create_todo(
 
 
 @router.put("/{todo_id}", response_model=schemas.APIResponse)
+@limiter.limit("20/minute")
 async def update_todo(
+    request: Request,
     todo_id: int,
     todo: schemas.TodoUpdate,
     db: AsyncSession = Depends(get_db),
@@ -57,7 +70,9 @@ async def update_todo(
 
 
 @router.patch("/{todo_id}", response_model=schemas.APIResponse)
+@limiter.limit("20/minute")
 async def patch_todo(
+    request: Request,
     todo_id: int,
     todo: schemas.TodoPatch,
     db: AsyncSession = Depends(get_db),
@@ -70,7 +85,9 @@ async def patch_todo(
 
 
 @router.delete("/{todo_id}")
+@limiter.limit("20/minute")
 async def delete_todo(
+    request: Request,
     todo_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
