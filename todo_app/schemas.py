@@ -18,6 +18,14 @@ class TokenResponse(BaseModel):
     token_type: str   = "bearer"
     expires_in: str   = "15 minutes"
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+class TokenResponseWithRefresh(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    expires_in: str = "15 minutes"
 
 # ─── Employee ─────────────────────────────────────────────
 
