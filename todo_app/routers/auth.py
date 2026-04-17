@@ -27,6 +27,7 @@ async def register(
     hashed = auth.hash_password(body.password)
     new_user = models.User(
         username=body.username,
+        email=body.email,
         password=hashed
     )
     db.add(new_user)
@@ -36,7 +37,7 @@ async def register(
     return {
         "success": True,
         "message": "User registered successfully",
-        "data": {"username": new_user.username}
+        "data": {"username": new_user.username, "email": new_user.email}
     }
 
 
